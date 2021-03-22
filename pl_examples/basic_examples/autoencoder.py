@@ -117,7 +117,7 @@ def cli_main():
     # ------------
     # training
     # ------------
-    trainer = pl.Trainer.from_argparse_args(args)
+    trainer = pl.Trainer.from_argparse_args(args, track_grad_norm=2, log_every_n_steps=1)
     trainer.fit(model, train_loader, val_loader)
 
     # ------------

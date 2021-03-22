@@ -23,6 +23,7 @@ class TrainingTricksConnector:
     def on_trainer_init(
         self,
         gradient_clip_val,
+        autoclip_gradient_percentile,
         track_grad_norm,
         accumulate_grad_batches,
         truncated_bptt_steps,
@@ -33,6 +34,18 @@ class TrainingTricksConnector:
 
         # gradient clipping
         self.trainer.gradient_clip_val = gradient_clip_val
+        self.trainer.autoclip_gradient_percentile = autoclip_gradient_percentile
+
+        if self.trainer.gradient_clip_val != 0 and self.trainer.autoclip_gradient_percentile != -1:
+            raise MisconfigurationException(
+                "gradient_clip_val and autoclip_gradient_percentile conflict with one "
+                "another. Choose either constant clipping or adaptive clipping."
+            )
+        if self.trainer.autoclip_gradient_percentile != -1 and track_grad_norm == -1:
+            raise MisconfigurationException(
+                "autoclip_gradient_percentile is on, but track_grad_norm = -1. track_grad_norm "
+                "must be set to use adaptive clipping."
+            )
 
         # gradient norm tracking
         if not isinstance(track_grad_norm, (int, float)) and track_grad_norm != 'inf':

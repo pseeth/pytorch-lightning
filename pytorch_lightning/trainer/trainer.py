@@ -92,6 +92,7 @@ class Trainer(
         callbacks: Optional[Union[List[Callback], Callback]] = None,
         default_root_dir: Optional[str] = None,
         gradient_clip_val: float = 0,
+        autoclip_gradient_percentile: float = -1,
         process_position: int = 0,
         num_nodes: int = 1,
         num_processes: int = 1,
@@ -197,6 +198,9 @@ class Trainer(
             gpus: number of gpus to train on (int) or which GPUs to train on (list or str) applied per node
 
             gradient_clip_val: 0 means don't clip.
+
+            autoclip_gradient_percentile: Adapt gradient clipping value to specified percentile of gradient norm history. 
+                -1 means AutoClip is off.
 
             limit_train_batches: How much of training dataset to check (float = fraction, int = num_batches)
 
@@ -343,7 +347,8 @@ class Trainer(
 
         # init training tricks
         self.training_tricks_connector.on_trainer_init(
-            gradient_clip_val, track_grad_norm, accumulate_grad_batches, truncated_bptt_steps, terminate_on_nan
+            gradient_clip_val, autoclip_gradient_percentile, track_grad_norm, accumulate_grad_batches, 
+            truncated_bptt_steps, terminate_on_nan
         )
         self.train_loop.on_trainer_init(
             max_epochs,
